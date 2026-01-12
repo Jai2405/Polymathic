@@ -3,8 +3,10 @@
  *
  * Displays a single subject as a card.
  * Shows subject name, description, and action buttons.
+ * Clicking the card navigates to the subject detail page.
  */
 
+import { useNavigate } from "react-router-dom"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Trash2, Edit } from "lucide-react"
@@ -17,8 +19,17 @@ interface SubjectCardProps {
 }
 
 export function SubjectCard({ subject, onEdit, onDelete }: SubjectCardProps) {
+  const navigate = useNavigate()
+
+  const handleCardClick = () => {
+    navigate(`/subjects/${subject.id}`)
+  }
+
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
+    <Card
+      className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <CardTitle className="text-xl">{subject.name}</CardTitle>
         {subject.description && (
@@ -31,7 +42,10 @@ export function SubjectCard({ subject, onEdit, onDelete }: SubjectCardProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onEdit(subject)}
+          onClick={(e) => {
+            e.stopPropagation() // Prevent card click
+            onEdit(subject)
+          }}
         >
           <Edit className="h-4 w-4 mr-1" />
           Edit
@@ -39,7 +53,10 @@ export function SubjectCard({ subject, onEdit, onDelete }: SubjectCardProps) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => onDelete(subject.id)}
+          onClick={(e) => {
+            e.stopPropagation() // Prevent card click
+            onDelete(subject.id)
+          }}
         >
           <Trash2 className="h-4 w-4 mr-1" />
           Delete

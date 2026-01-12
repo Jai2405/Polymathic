@@ -5,17 +5,22 @@
  *
  * Phase 1: Basic structure with Layout and HomePage
  * Phase 2: Added React Query provider for API state management
- * Phase 5: Will add React Router for navigation
+ * Phase 3: Added React Router for navigation between pages
  *
  * Current Structure:
  * - QueryClientProvider: React Query for server state
+ * - BrowserRouter: Client-side routing
  * - Layout wrapper (Header + Main content)
- * - HomePage as the default view
+ * - Routes:
+ *   - / → HomePage (all subjects)
+ *   - /subjects/:id → SubjectDetailPage (notes and resources)
  */
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Layout } from "@/components/layout/Layout"
 import { HomePage } from "@/pages/HomePage"
+import { SubjectDetailPage } from "@/pages/SubjectDetailPage"
 
 // Create a React Query client
 // This manages all API data caching and state
@@ -35,9 +40,17 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout>
-        <HomePage />
-      </Layout>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            {/* Home page: Grid of all subjects */}
+            <Route path="/" element={<HomePage />} />
+
+            {/* Subject detail page: Notes and resources for a subject */}
+            <Route path="/subjects/:id" element={<SubjectDetailPage />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
     </QueryClientProvider>
   )
 }
