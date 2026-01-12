@@ -29,12 +29,12 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header - sticky navigation */}
       <Header />
 
       {/* Main Content Area */}
-      <main className="container py-8">
+      <main className="flex-1 py-8 px-8">
         {children}
       </main>
 

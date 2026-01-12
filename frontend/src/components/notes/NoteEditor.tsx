@@ -18,6 +18,8 @@ import Placeholder from "@tiptap/extension-placeholder"
 import Typography from "@tiptap/extension-typography"
 import Link from "@tiptap/extension-link"
 import { useEffect, useCallback, useRef, useState } from "react"
+import { Save } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { NoteToolbar } from "./NoteToolbar"
 import type { Note, NoteUpdate } from "@/types/note.types"
 
@@ -29,7 +31,9 @@ interface NoteEditorProps {
 export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isLoadingNoteRef = useRef(false)
 
   /**
    * Auto-save function with debouncing.
@@ -39,6 +43,9 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
    */
   const autoSave = useCallback(
     async (content: string) => {
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true)
+
       // Clear any existing timeout
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
@@ -50,6 +57,7 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
           setIsSaving(true)
           await onUpdate(note.id, { content_json: content })
           setLastSaved(new Date())
+          setHasUnsavedChanges(false)
         } catch (error) {
           console.error("Auto-save failed:", error)
         } finally {
@@ -91,6 +99,11 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
     content: note.content_json ? JSON.parse(note.content_json) : "",
     // Called whenever the content changes
     onUpdate: ({ editor }) => {
+      // Don't auto-save if we're loading a new note
+      if (isLoadingNoteRef.current) {
+        return
+      }
+
       // Get the content as JSON
       const json = editor.getJSON()
       const jsonString = JSON.stringify(json)
@@ -102,7 +115,7 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[300px] max-w-none p-4",
+          "prose max-w-none focus:outline-none min-h-[600px] p-6 w-full",
       },
     },
   })
@@ -113,6 +126,13 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
    * This handles switching between different notes.
    */
   useEffect(() => {
+    // Mark that we're loading a new note
+    isLoadingNoteRef.current = true
+
+    // Reset unsaved changes flag when switching notes
+    setHasUnsavedChanges(false)
+    setLastSaved(null)
+
     if (editor && note.content_json) {
       const currentContent = JSON.stringify(editor.getJSON())
       const newContent = note.content_json
@@ -129,6 +149,12 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
         }
       }
     }
+
+    // After a brief delay, mark loading as complete
+    // This allows the content to be set before re-enabling auto-save
+    setTimeout(() => {
+      isLoadingNoteRef.current = false
+    }, 100)
   }, [note.id, note.content_json, editor])
 
   /**
@@ -142,6 +168,41 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
     }
   }, [])
 
+  /**
+   * Manual save function
+   */
+  const manualSave = useCallback(async () => {
+    if (!editor || !hasUnsavedChanges) return
+
+    try {
+      setIsSaving(true)
+      const json = editor.getJSON()
+      const jsonString = JSON.stringify(json)
+      await onUpdate(note.id, { content_json: jsonString })
+      setLastSaved(new Date())
+      setHasUnsavedChanges(false)
+    } catch (error) {
+      console.error("Save failed:", error)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [editor, note.id, onUpdate, hasUnsavedChanges])
+
+  /**
+   * Keyboard shortcut for manual save (Ctrl+S / Cmd+S)
+   */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        manualSave()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [manualSave])
+
   // Show loading state while editor initializes
   if (!editor) {
     return (
@@ -152,7 +213,7 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
   }
 
   return (
-    <div className="border rounded-lg bg-white shadow-sm overflow-hidden">
+    <div className="border rounded-lg bg-white shadow-sm overflow-hidden w-full h-full flex flex-col">
       {/* Toolbar */}
       {editor && <NoteToolbar editor={editor} />}
 
@@ -165,19 +226,33 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
               Saving...
             </span>
           )}
-          {!isSaving && lastSaved && (
+          {!isSaving && lastSaved && !hasUnsavedChanges && (
             <span className="text-gray-500">
               Saved at {lastSaved.toLocaleTimeString()}
             </span>
           )}
-          {!isSaving && !lastSaved && (
+          {!isSaving && hasUnsavedChanges && (
+            <span className="text-amber-600">Unsaved changes</span>
+          )}
+          {!isSaving && !lastSaved && !hasUnsavedChanges && (
             <span className="text-gray-400">Ready to edit</span>
           )}
         </span>
+        <Button
+          size="sm"
+          onClick={manualSave}
+          disabled={isSaving || !hasUnsavedChanges}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Save
+        </Button>
       </div>
 
       {/* Editor content */}
-      <EditorContent editor={editor} />
+      <div className="flex-1 overflow-y-auto w-full">
+        <EditorContent editor={editor} className="w-full h-full" />
+      </div>
     </div>
   )
 }

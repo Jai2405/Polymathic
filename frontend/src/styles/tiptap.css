@@ -1,15 +1,15 @@
 /**
  * TipTap Editor Styles
  *
- * Custom styles for the TipTap rich text editor.
- * These styles make the editor content look professional.
+ * Just override Tailwind prose max-width to make editor full width
  */
 
-/* Base editor styles */
 .ProseMirror {
   outline: none;
-  min-height: 300px;
-  padding: 1rem;
+}
+
+.ProseMirror.prose {
+  max-width: none !important;
 }
 
 /* Placeholder styling */
@@ -19,127 +19,4 @@
   float: left;
   height: 0;
   pointer-events: none;
-}
-
-/* Prose typography styles */
-.prose {
-  color: #374151;
-  max-width: none;
-}
-
-.prose h1 {
-  font-size: 2em;
-  font-weight: 700;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  line-height: 1.2;
-}
-
-.prose h2 {
-  font-size: 1.5em;
-  font-weight: 600;
-  margin-top: 0.75em;
-  margin-bottom: 0.5em;
-  line-height: 1.3;
-}
-
-.prose h3 {
-  font-size: 1.25em;
-  font-weight: 600;
-  margin-top: 0.75em;
-  margin-bottom: 0.5em;
-  line-height: 1.4;
-}
-
-.prose p {
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
-  line-height: 1.75;
-}
-
-.prose ul,
-.prose ol {
-  padding-left: 1.5em;
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
-}
-
-.prose li {
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
-}
-
-.prose ul {
-  list-style-type: disc;
-}
-
-.prose ol {
-  list-style-type: decimal;
-}
-
-.prose ul ul {
-  list-style-type: circle;
-}
-
-.prose blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1em;
-  font-style: italic;
-  color: #6b7280;
-  margin: 1em 0;
-}
-
-.prose code {
-  background-color: #f3f4f6;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  font-size: 0.875em;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.prose pre {
-  background-color: #1f2937;
-  color: #f3f4f6;
-  padding: 1em;
-  border-radius: 0.5em;
-  overflow-x: auto;
-  margin: 1em 0;
-}
-
-.prose pre code {
-  background-color: transparent;
-  padding: 0;
-  color: inherit;
-  font-size: 0.875em;
-}
-
-.prose a {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-.prose a:hover {
-  color: #1d4ed8;
-}
-
-.prose strong {
-  font-weight: 600;
-}
-
-.prose em {
-  font-style: italic;
-}
-
-.prose s {
-  text-decoration: line-through;
-}
-
-/* Focus styles */
-.ProseMirror:focus {
-  outline: none;
-}
-
-/* Selection styles */
-.ProseMirror ::selection {
-  background-color: #dbeafe;
 }
