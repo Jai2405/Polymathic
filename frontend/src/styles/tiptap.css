@@ -20,3 +20,25 @@
   height: 0;
   pointer-events: none;
 }
+
+/* Image styling */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+  border-radius: 0.5em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Add visual indicator that image is interactive */
+.ProseMirror img:hover {
+  opacity: 0.9;
+}

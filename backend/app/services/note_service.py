@@ -102,7 +102,7 @@ class NoteService:
             subject_id: ID of the subject
 
         Returns:
-            List[Note]: List of notes, ordered by ID (newest first)
+            List[Note]: List of notes, ordered by ID (oldest first / creation order)
 
         Raises:
             HTTPException 404: If subject doesn't exist
@@ -119,10 +119,10 @@ class NoteService:
                 detail=f"Subject with id {subject_id} not found"
             )
 
-        # Query all notes for this subject, order by id descending (newest first)
+        # Query all notes for this subject, order by id ascending (oldest first / creation order)
         notes = db.query(Note).filter(
             Note.subject_id == subject_id
-        ).order_by(Note.id.desc()).all()
+        ).order_by(Note.id).all()
 
         return notes
 

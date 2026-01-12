@@ -17,6 +17,7 @@ import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
 import Typography from "@tiptap/extension-typography"
 import Link from "@tiptap/extension-link"
+import Image from "@tiptap/extension-image"
 import { useEffect, useCallback, useRef, useState } from "react"
 import { Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -92,6 +93,40 @@ export function NoteEditor({ note, onUpdate }: NoteEditorProps) {
         openOnClick: false, // Don't follow links while editing
         HTMLAttributes: {
           class: "text-blue-600 underline",
+        },
+      }),
+      // Image support with paste and resize
+      Image.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            width: {
+              default: 600,
+              renderHTML: attributes => {
+                if (!attributes.width) {
+                  return {}
+                }
+                return {
+                  width: attributes.width,
+                }
+              },
+              parseHTML: element => {
+                const width = element.getAttribute('width')
+                return width ? parseInt(width) : 600
+              },
+            },
+          }
+        },
+        addProseMirrorPlugins() {
+          return [
+            ...(this.parent?.() || []),
+          ]
+        },
+      }).configure({
+        inline: false,
+        allowBase64: true, // Allow pasted images
+        HTMLAttributes: {
+          class: "editor-image",
         },
       }),
     ],
